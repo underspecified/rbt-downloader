@@ -202,7 +202,7 @@ class DownloaderApp:
 
         items = self.login_and_get_list(username, password)
 
-        total_files = len(items) * 1
+        total_files = len(items) * 3
         counter = 1
 
         for item in items:
@@ -239,12 +239,19 @@ class DownloaderApp:
         file_size = int(r.headers['Content-Length'])
 
         file_path = os.path.join(save_location, filename)
-        self.status2.config(text="")
-        status2 = "   {0}    {1}   ".format(filename, convert_bytes(file_size))
-        self.status2.config(text=status2)
 
-        self.root.update()
-        urllib.request.urlretrieve(r.url, file_path, reporthook=self.update_bar)
+        try:
+            existing_file_size = os.path.getsize(file_path)
+        except FileNotFoundError:
+            existing_file_size = 0
+
+        if existing_file_size < file_size:
+            self.status2.config(text="")
+            status2 = "   {0}    {1}   ".format(filename, convert_bytes(file_size))
+            self.status2.config(text=status2)
+
+            self.root.update()
+            urllib.request.urlretrieve(r.url, file_path, reporthook=self.update_bar)
 
         return file_path
 
