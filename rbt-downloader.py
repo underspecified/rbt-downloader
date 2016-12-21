@@ -7,6 +7,7 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
+from urllib.error import HTTPError
 
 import requests
 from bs4 import BeautifulSoup
@@ -25,23 +26,26 @@ def convert_bytes(num):
 
 
 class DownloaderApp:
-    def login_and_get_list(self, username, password):
+    headers = {
+
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:31.0) Gecko/20100101 Firefox/31.0',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate',
+
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+
+        'Connection': 'keep-alive'
+    }
+    opener = urllib.request.FancyURLopener({})
+    opener.version = headers['User-Agent']
+    urllib._urlopener = opener
+
+    def login(self, username, password):
 
         # noinspection PyPep8Naming
         LOGIN_URL = "http://braintrust.iwtstudents.com/users/login"
-
-        headers = {
-
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:31.0) Gecko/20100101 Firefox/31.0',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-
-            'Cache-Control': 'no-cache',
-            'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-
-            'Connection': 'keep-alive'
-        }
 
         login_payload = {
 
@@ -54,10 +58,15 @@ class DownloaderApp:
 
         self.session = requests.Session()
 
-        self.session.get(LOGIN_URL, headers=headers)
+        self.session.get(LOGIN_URL, headers=self.headers)
 
         r = self.session.post(LOGIN_URL, data=login_payload)
 
+        return r
+
+    def login_and_get_list(self, username, password):
+
+        r = self.login(username, password)
         soup = BeautifulSoup(r.content)
         div_list = soup.find_all('div', {'class': 'modulenav-single'})
 
@@ -258,6 +267,8 @@ class DownloaderApp:
                     urllib.request.urlretrieve(r.url, file_path, reporthook=self.update_bar)
                     downloaded = True
                 except TimeoutError:
+                    pass
+                except HTTPError:
                     pass
 
         return file_path
