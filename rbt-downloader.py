@@ -251,7 +251,14 @@ class DownloaderApp:
             self.status2.config(text=status2)
 
             self.root.update()
-            urllib.request.urlretrieve(r.url, file_path, reporthook=self.update_bar)
+
+            downloaded = False
+            while not downloaded:
+                try:
+                    urllib.request.urlretrieve(r.url, file_path, reporthook=self.update_bar)
+                    downloaded = True
+                except TimeoutError:
+                    pass
 
         return file_path
 
