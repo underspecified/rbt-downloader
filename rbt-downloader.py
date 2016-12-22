@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import platform
 import urllib.request
 from pprint import pprint
 from tkinter import *
@@ -119,7 +120,8 @@ class DownloaderApp:
         self.save_path = StringVar()
         self.root = root
         self.root.title("Amp Your Results - Ramit's Brain Trust Downloader")
-        #self.root.iconbitmap(default='app.ico')
+        if platform.system() == 'Windows':
+            self.root.iconbitmap(default='app.ico')
 
         self.counter = 0
         self.session = None
